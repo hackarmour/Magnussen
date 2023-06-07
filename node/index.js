@@ -33,7 +33,7 @@ export class AppleDoreClient {
   sendCommand(command, ...args) {
     return new Promise((resolve, reject) => {
       if (!this.connected) {
-        reject(new Error("Not connected to Redis"));
+        reject(new Error("Not connected to Appledore"));
         return;
       }
 
@@ -68,7 +68,7 @@ export class AppleDoreClient {
     }
     return noEscapeString;
   }
-  pleaseFireMe() {
+  disconnect() {
     this.client.end();
     this.connected = false;
     console.log("Disconnected from AppleDore");
