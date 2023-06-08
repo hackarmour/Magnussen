@@ -45,4 +45,5 @@ func main() {
 	fmt.Println("ECHO:", echoResponse)
 	fmt.Println("GET:", getKeyResponse)
 	fmt.Println("DEL:", deleteKeyResponse)
+
 }

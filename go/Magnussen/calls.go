@@ -28,12 +28,13 @@ func (c *Client) SendCommand(command string, args ...string) (string, error) {
 	}
 	responseData := ""
 	reader := bufio.NewReader(c.conn)
-	response, err := reader.ReadString('\n')
+	buf := make([]byte, 1024)
+	_, err = reader.Read(buf)
 	if err != nil {
-		return "", err
-	}
+		panic(err)
 
-	responseData += c.encoder(response)
+	}
+	responseData += c.encoder(strings.Split(string(buf), "\r\n")[len(strings.Split(string(buf), "\r\n"))-2])
 
 	return responseData, nil
 }
