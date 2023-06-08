@@ -28,6 +28,7 @@ func (c *Client) SendCommand(command string, args ...string) (string, error) {
 	}
 	responseData := ""
 	reader := bufio.NewReader(c.conn)
+	// TODO: Add support for data > 1024 bytes
 	buf := make([]byte, 1024)
 	_, err = reader.Read(buf)
 	if err != nil {
