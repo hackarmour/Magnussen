@@ -2,44 +2,61 @@ package Magnussen
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"strings"
 )
 
+const (
+	maxBufferSize = 4096 // Maximum buffer size for each read iteration
+)
+
 type Client struct {
-	conn net.Conn
+	conn net.Conn // TCP connection to Appledore
 }
 
+// NewClient creates a new instance of the Client with the given TCP connection.
 func NewClient(conn net.Conn) *Client {
 	return &Client{conn: conn}
 }
 
+// SendCommand sends a Redis command with the specified arguments to the Appledore server
+// and returns the response received from the server.
 func (c *Client) SendCommand(command string, args ...string) (string, error) {
 	if c.conn == nil {
 		return "", errors.New("Not connected to Appledore")
 	}
 
+	// Build the Redis command
 	redisCommand := c.buildCommand(command, args)
+
+	// Send the command to the server
 	_, err := fmt.Fprint(c.conn, redisCommand)
 	if err != nil {
 		return "", err
 	}
+
 	responseData := ""
 	reader := bufio.NewReader(c.conn)
-	// TODO: Add support for data > 1024 bytes
-	buf := make([]byte, 1024)
-	_, err = reader.Read(buf)
+
+	// Read the response from the server
+	buf, err := readLargeData(reader)
 	if err != nil {
 		panic(err)
-
 	}
-	responseData += c.encoder(strings.Split(string(buf), "\r\n")[len(strings.Split(string(buf), "\r\n"))-2])
+
+	// Process the response
+	responseLines := strings.Split(string(buf), "\r\n")
+	lastLine := responseLines[len(responseLines)-2]
+	responseData += c.encoder(lastLine)
 
 	return responseData, nil
 }
 
+// buildCommand builds the Redis command string from the command and arguments.
 func (c *Client) buildCommand(command string, args []string) string {
 	totalArgs := 1 + len(args)
 
@@ -52,6 +69,7 @@ func (c *Client) buildCommand(command string, args []string) string {
 	return redisCommand
 }
 
+// encoder processes the data received from the server and removes escape characters.
 func (c *Client) encoder(data string) string {
 	noEscapeString := strings.ReplaceAll(data, "\r\n", "")
 	noEscapeString = strings.ReplaceAll(noEscapeString, "$\\d+", "")
@@ -65,4 +83,27 @@ func (c *Client) encoder(data string) string {
 	}
 
 	return noEscapeString
+}
+
+// readLargeData reads large data from the reader in chunks until the end or an error occurs.
+func readLargeData(reader *bufio.Reader) ([]byte, error) {
+	var buf bytes.Buffer
+	buffer := make([]byte, maxBufferSize)
+
+	for {
+		n, err := reader.Read(buffer)
+		if err != nil {
+			if err != io.EOF {
+				return nil, err
+			}
+			break
+		}
+		buf.Write(buffer[:n])
+
+		if n < maxBufferSize {
+			break
+		}
+	}
+
+	return buf.Bytes(), nil
 }
