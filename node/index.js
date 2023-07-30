@@ -1,27 +1,22 @@
 import { createConnection } from "net";
 
 export class AppleDoreClient {
-  /**
-   *
-   * @param {import('net').NetConnectOpts} options
-   */
+  options;
+  client;
+  connected;
+  
   constructor(options) {
     this.options = options;
     this.client = null;
   }
 
-  /**
-   *
-   * @param {(()=>void)} handler
-   * @returns {Promise<void>}
-   */
   connect(handler) {
     return new Promise((resolve, reject) => {
       this.client = createConnection(this.options, handler);
 
       this.client.on("connect", () => {
         this.connected = true;
-        resolve();
+        resolve("connected");
       });
 
       this.client.on("error", (err) => {
@@ -39,7 +34,6 @@ export class AppleDoreClient {
 
       const redisCommand = this.#buildCommand(command, args);
       this.client.write(redisCommand);
-
       let responseData = "";
 
       this.client.once("data", (data) => {
@@ -54,10 +48,7 @@ export class AppleDoreClient {
       .map((v) => `$${v.length}\r\n${v}\r\n`)
       .join("")}\r\n`;
   }
-  /**
-   *
-   * @param {string} data
-   */
+
   #encoder(data) {
     let noEscapeString = data.replace(/[\r\n]/g, "").replace(/\$\d+/g, "");
     if (noEscapeString.startsWith("+")) {
@@ -68,6 +59,7 @@ export class AppleDoreClient {
     }
     return noEscapeString;
   }
+
   disconnect() {
     this.client.end();
     this.connected = false;
