@@ -34,6 +34,7 @@ export class AppleDoreClient {
 
       const redisCommand = this.#buildCommand(command, args);
       this.client.write(redisCommand);
+      
       let responseData = "";
 
       this.client.once("data", (data) => {
