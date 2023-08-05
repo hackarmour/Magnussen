@@ -60,7 +60,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to send LPOP command:", err)
 	}
-	lrangeResponse, err := client.SendCommand("lrange", "myarr", "0", "3")
+	lrangeResponse, err := client.SendCommand("lrange", "myarr", "0", "-1")
 	if err != nil {
 		log.Fatal("Failed to send LRANGE command:", err)
 	}
