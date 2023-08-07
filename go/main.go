@@ -10,7 +10,7 @@ import (
 func main() {
 	client, err := Magnussen.Connect("localhost:6379")
 	if err != nil {
-		log.Fatal("Failed to connect to Appledore:", err)
+		log.Fatal(err.Error())
 	}
 
 	fmt.Println("Connected to Appledore")
@@ -60,7 +60,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to send LPOP command:", err)
 	}
-	lrangeResponse, err := client.SendCommand("lrange", "myarr", "0", "-1")
+	lrangeResponse, err := client.SendCommand("lrange", "myarr", "0", "3")
 	if err != nil {
 		log.Fatal("Failed to send LRANGE command:", err)
 	}
