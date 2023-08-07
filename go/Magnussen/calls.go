@@ -51,7 +51,15 @@ func (c *Client) SendCommand(command string, args ...string) (string, error) {
 	// Process the response
 	responseLines := strings.Split(string(buf), "\r\n")
 	lastLine := responseLines[len(responseLines)-2]
+
 	responseData += c.encoder(lastLine)
+	if responseData == "" {
+		return "", errors.New("empty response data")
+	}
+	if responseData[0] == '-' {
+		errMsg := responseData[1:]
+		return "", errors.New(errMsg)
+	}
 
 	return responseData, nil
 }
