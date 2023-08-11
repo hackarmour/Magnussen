@@ -56,7 +56,7 @@ func (c *Client) SendCommand(command string, args ...string) (string, error) {
 	if responseData == "" {
 		return "", errors.New("empty response data")
 	}
-	if responseData[0] == '-' {
+	if responseLines[0][0] == '-' {
 		errMsg := responseData[1:]
 		return "", errors.New(errMsg)
 	}
