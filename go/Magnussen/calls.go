@@ -59,6 +59,8 @@ func (c *Client) SendCommand(command string, args ...string) (string, error) {
 	if responseLines[0][0] == '-' {
 		errMsg := responseData[1:]
 		return "", errors.New(errMsg)
+	} else if responseData == "$-1" {
+		return "", errors.New("key not found")
 	}
 
 	return responseData, nil
