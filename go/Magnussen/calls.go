@@ -26,7 +26,7 @@ func NewClient(conn net.Conn) *Client {
 // SendCommand sends a Redis command with the specified arguments to the Appledore server
 // and returns the response received from the server.
 func (c *Client) SendCommand(command string, args ...string) (string, error) {
-	if c.conn == nil {
+	if c == nil || c.conn == nil {
 		return "", errors.New("Not connected to Appledore")
 	}
 
