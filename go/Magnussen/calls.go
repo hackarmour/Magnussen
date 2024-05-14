@@ -37,8 +37,8 @@ func (c *Client) SendCommand(command string, args ...string) (string, error) {
 
 	// Send the command to the server
 	c.mutex.Lock()
+	defer c.mutex.Unlock()
 	_, err := fmt.Fprint(c.conn, redisCommand)
-	c.mutex.Unlock()
 	if err != nil {
 		return "", err
 	}
