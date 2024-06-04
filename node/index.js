@@ -4,7 +4,7 @@ export class AppleDoreClient {
   options;
   client;
   connected;
-  
+
   constructor(options) {
     this.options = options;
     this.client = null;
@@ -34,7 +34,7 @@ export class AppleDoreClient {
 
       const redisCommand = this.#buildCommand(command, args);
       this.client.write(redisCommand);
-      
+
       let responseData = "";
 
       this.client.once("data", (data) => {
@@ -51,14 +51,17 @@ export class AppleDoreClient {
   }
 
   #encoder(data) {
-    let noEscapeString = data.replace(/[\r\n]/g, "").replace(/\$\d+/g, "");
-    if (noEscapeString.startsWith("+")) {
-      noEscapeString = noEscapeString.substring(1);
+    const arr = data.split("\r\n")
+    arr.pop()
+    if (arr.length === 0) return ""
+    const statusString = arr[0];
+    if (statusString[0] === "-") return ""
+    if (statusString[0] === "+") return "OK"
+    if (statusString[0] === "$") {
+      if (arr.length === 1) return ""
+      if (arr.length === 2) return arr[1]
     }
-    if (noEscapeString.startsWith(":")) {
-      noEscapeString = noEscapeString.substring(1);
-    }
-    return noEscapeString;
+    return ""
   }
 
   disconnect() {
@@ -67,3 +70,4 @@ export class AppleDoreClient {
     console.log("Disconnected from AppleDore");
   }
 }
+
